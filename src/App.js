@@ -1,24 +1,53 @@
+/* eslint-disable arrow-parens */
 import React from 'react';
-import logo from './logo.svg';
-import './App.css';
+import TodoList from './TodoList';
+import AddTodoForm from './AddTodoForm';
+import { useLocalStorage } from './hooks';
 
 function App() {
+  const [items, setItems] = useLocalStorage('todoItems', [{
+    id: 1,
+    title: 'My first todo',
+    completed: false
+  }]);
+
+  const sortItems = () => {
+    return [...items].sort((a, b) => {
+      if (a.title > b.title) return 1;
+      return -1;
+    });
+  };
+
+  const onComplete = id => {
+    const index = items.findIndex(item => item.id === id);
+    const newItems = [...items];
+    newItems[index].completed = !newItems[index].completed;
+    setItems(newItems);
+  };
+
+  const onDelete = id => {
+    const index = items.findIndex(item => item.id === id);
+    const newItems = [...items];
+    newItems.splice(index, 1);
+    setItems(newItems);
+  };
+
+  const addItem = item => {
+    const id = items.length ? items[items.length - 1].id + 1 : 1;
+    const newItem = {
+      id,
+      title: item,
+      completed: false
+    };
+    const newItems = [...items, newItem];
+    setItems(newItems);
+  };
+
   return (
     <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
+      <h1>Bucket List</h1>
+      <AddTodoForm addItem={addItem} />
+      <TodoList items={sortItems()} onComplete={onComplete} onDelete={onDelete} />
     </div>
   );
 }
